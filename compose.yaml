@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Docker/Dockerfile-nginx
+    volumes:
+      - .:/var/www/symfony/
+    ports:
+      - "8001:80"
+    networks:
+      - symfony
+    depends_on:
+      - php
+
+  php:
+    build:
+      context: .
+      dockerfile: Docker/Dockerfile-php
+    volumes:
+      - .:/var/www/symfony/
+    environment:
+      APP_ENV: dev
+    networks:
+      - symfony
+
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-symfony}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgresql:/var/lib/postgresql/data
+    networks:
+      - symfony
+
+networks:
+  symfony:
+volumes:
+###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###
